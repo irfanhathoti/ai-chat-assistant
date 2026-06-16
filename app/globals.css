@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-[#0a0a0f] text-slate-100 antialiased;
+}
+
+/* ---- Animated gradient background (GPU-accelerated) -------------------- */
+/* Animate a `transform` on a pseudo-element instead of `background-position`.
+   background-position forces a full-element repaint every frame; transforms
+   stay on the compositor, so this animates smoothly even on low-end mobile.
+   The ::before sits at z-index:-1 so all page content paints above it. */
+.animated-gradient {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #0a0a0f;
+}
+
+.animated-gradient::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background: linear-gradient(130deg, #0a0a0f, #14122b, #0d2440, #1a1033, #0a0a0f);
+  transform: translate3d(-6%, -3%, 0) scale(1.3);
+  will-change: transform;
+  animation: gradient-pan 22s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes gradient-pan {
+  from {
+    transform: translate3d(-6%, -3%, 0) scale(1.3);
+  }
+  to {
+    transform: translate3d(6%, 3%, 0) scale(1.3);
+  }
+}
+
+/* Respect reduced-motion preference (accessibility + battery/CPU savings). */
+@media (prefers-reduced-motion: reduce) {
+  .animated-gradient::before {
+    animation: none;
+  }
+}
+
+/* Soft floating glow blobs used behind glass cards */
+.glow-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ---- Glassmorphism ----------------------------------------------------- */
+.glass {
+  @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+}
+
+/* ---- Scrollbar --------------------------------------------------------- */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-white/10;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-white/20;
+}
+
+/* ---- Markdown content -------------------------------------------------- */
+.markdown p {
+  @apply my-2 leading-relaxed;
+}
+.markdown p:first-child {
+  @apply mt-0;
+}
+.markdown p:last-child {
+  @apply mb-0;
+}
+.markdown ul {
+  @apply my-2 list-disc space-y-1 pl-5;
+}
+.markdown ol {
+  @apply my-2 list-decimal space-y-1 pl-5;
+}
+.markdown a {
+  @apply text-indigo-300 underline underline-offset-2 hover:text-indigo-200;
+}
+.markdown code {
+  @apply rounded bg-black/40 px-1.5 py-0.5 font-mono text-[0.85em] text-indigo-200;
+}
+.markdown pre {
+  @apply my-3 overflow-x-auto rounded-xl border border-white/10 bg-black/50 p-4;
+}
+.markdown pre code {
+  @apply bg-transparent p-0 text-slate-100;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  @apply mb-2 mt-4 font-semibold;
+}
+.markdown table {
+  @apply my-3 w-full border-collapse text-sm;
+}
+.markdown th,
+.markdown td {
+  @apply border border-white/10 px-3 py-1.5 text-left;
+}
