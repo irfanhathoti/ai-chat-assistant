@@ -49,11 +49,13 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   }
 
+  const canSend = !disabled && value.trim().length > 0;
+
   return (
-    <div className="px-4 pb-5 pt-2">
+    <div className="px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-2 sm:px-4">
       <form
         onSubmit={handleSubmit}
-        className="glass mx-auto flex max-w-3xl items-end gap-2 rounded-2xl p-2 shadow-lg shadow-black/30 focus-within:border-indigo-400/50"
+        className="glass-strong mx-auto flex max-w-3xl items-end gap-2 rounded-[1.25rem] p-2 shadow-xl shadow-black/40 transition-colors duration-200 focus-within:border-indigo-400/40 focus-within:ring-1 focus-within:ring-indigo-400/30"
       >
         <textarea
           ref={textareaRef}
@@ -62,14 +64,15 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="Message AI Assistant…"
-          className="thin-scrollbar max-h-[200px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] text-slate-100 placeholder-slate-500 outline-none"
+          className="thin-scrollbar max-h-[200px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] leading-relaxed text-slate-100 placeholder-slate-500 outline-none"
         />
         <motion.button
           type="submit"
-          disabled={disabled || !value.trim()}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.92 }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-900/40 transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={!canSend}
+          whileHover={canSend ? { scale: 1.06 } : undefined}
+          whileTap={canSend ? { scale: 0.9 } : undefined}
+          transition={{ type: "spring", stiffness: 400, damping: 22 }}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-950/50 transition-all duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:from-white/10 disabled:to-white/10 disabled:text-slate-500 disabled:shadow-none"
           aria-label="Send message"
         >
           {disabled ? (
@@ -79,10 +82,10 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           )}
         </motion.button>
       </form>
-      <p className="mt-2 text-center text-xs text-slate-500">
-        Press <kbd className="rounded bg-white/10 px-1">Enter</kbd> to send,{" "}
-        <kbd className="rounded bg-white/10 px-1">Shift</kbd> +{" "}
-        <kbd className="rounded bg-white/10 px-1">Enter</kbd> for a new line.
+      <p className="mt-2 hidden text-center text-xs text-slate-500 sm:block">
+        Press <kbd className="rounded bg-white/10 px-1 font-sans">Enter</kbd> to send,{" "}
+        <kbd className="rounded bg-white/10 px-1 font-sans">Shift</kbd> +{" "}
+        <kbd className="rounded bg-white/10 px-1 font-sans">Enter</kbd> for a new line.
       </p>
     </div>
   );

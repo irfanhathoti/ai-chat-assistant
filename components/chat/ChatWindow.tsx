@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import EmptyChatState from "./EmptyChatState";
+import MessageSkeleton from "./MessageSkeleton";
 import ChatInput from "./ChatInput";
 import type { Role } from "@/types/chat";
 
@@ -47,7 +48,9 @@ export default function ChatWindow({
         ref={scrollRef}
         className="thin-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto"
       >
-        {isEmpty ? (
+        {loadingMessages ? (
+          <MessageSkeleton />
+        ) : isEmpty ? (
           <EmptyChatState onSuggestion={onSend} />
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6">

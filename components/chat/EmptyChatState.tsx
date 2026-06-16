@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageSquarePlus, Sparkles } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 
 interface EmptyChatStateProps {
   /** Optional handler to start a chat from a suggestion. */
@@ -20,16 +20,23 @@ export default function EmptyChatState({ onSuggestion }: EmptyChatStateProps) {
   return (
     <div className="m-auto flex flex-col items-center px-6 py-10 text-center">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 12 }}
+        initial={{ opacity: 0, scale: 0.94, y: 14 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-col items-center"
       >
-        <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-900/50">
-          <Sparkles className="h-8 w-8 text-white" />
+        {/* Glowing logo */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 rounded-2xl bg-indigo-500/40 blur-2xl" />
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 shadow-xl shadow-indigo-950/60 ring-1 ring-white/20">
+            <Sparkles className="h-8 w-8 text-white" />
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-white">How can I help you today?</h2>
-        <p className="mt-2 max-w-md text-sm text-slate-400">
+
+        <h2 className="bg-gradient-to-b from-white to-slate-400 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
+          How can I help you today?
+        </h2>
+        <p className="mt-2.5 max-w-md text-sm text-slate-400">
           Ask anything — or pick a suggestion to get started.
         </p>
 
@@ -37,16 +44,16 @@ export default function EmptyChatState({ onSuggestion }: EmptyChatStateProps) {
           {SUGGESTIONS.map((s, i) => (
             <motion.button
               key={s}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 + i * 0.07 }}
-              whileHover={{ scale: 1.02 }}
+              transition={{ delay: 0.18 + i * 0.07, ease: "easeOut" }}
+              whileHover={{ y: -3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSuggestion?.(s)}
-              className="glass group flex items-center gap-3 rounded-xl p-3.5 text-left text-sm text-slate-200 transition-colors hover:bg-white/10"
+              className="glass group flex items-center justify-between gap-3 rounded-2xl p-4 text-left text-sm text-slate-200 transition-colors duration-200 hover:border-white/20 hover:bg-white/[0.09]"
             >
-              <MessageSquarePlus className="h-4 w-4 shrink-0 text-indigo-300" />
-              <span>{s}</span>
+              <span className="leading-snug">{s}</span>
+              <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-500 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-indigo-300" />
             </motion.button>
           ))}
         </div>

@@ -31,33 +31,37 @@ export default function MessageBubble({ role, content }: MessageBubbleProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ type: "spring", stiffness: 280, damping: 26 }}
       className={`flex w-full gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
     >
       {/* Avatar */}
       <div
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
           isUser
-            ? "bg-white/10"
-            : "bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md shadow-indigo-900/40"
+            ? "border border-white/10 bg-white/[0.07]"
+            : "bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 shadow-lg shadow-indigo-950/50 ring-1 ring-white/20"
         }`}
       >
         {isUser ? (
-          <UserIcon className="h-5 w-5 text-slate-200" />
+          <UserIcon className="h-[18px] w-[18px] text-slate-300" />
         ) : (
-          <Sparkles className="h-5 w-5 text-white" />
+          <Sparkles className="h-[18px] w-[18px] text-white" />
         )}
       </div>
 
       {/* Bubble */}
-      <div className={`group flex max-w-[80%] flex-col ${isUser ? "items-end" : "items-start"}`}>
+      <div
+        className={`group flex max-w-[85%] flex-col sm:max-w-[80%] ${
+          isUser ? "items-end" : "items-start"
+        }`}
+      >
         <div
-          className={`rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm ${
+          className={`rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
             isUser
-              ? "rounded-tr-md bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
-              : "glass rounded-tl-md text-slate-100"
+              ? "rounded-tr-sm bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-950/40"
+              : "glass rounded-tl-sm text-slate-100 shadow-sm shadow-black/20"
           }`}
         >
           {isUser ? (
@@ -73,7 +77,10 @@ export default function MessageBubble({ role, content }: MessageBubbleProps) {
         {!isUser && (
           <button
             onClick={handleCopy}
-            className="mt-1.5 flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-slate-400 opacity-0 transition-opacity hover:text-slate-200 group-hover:opacity-100"
+            className={`mt-1.5 inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs transition-all duration-200 hover:bg-white/10 sm:opacity-0 sm:group-hover:opacity-100 ${
+              copied ? "text-emerald-300" : "text-slate-400 hover:text-slate-200"
+            }`}
+            aria-label="Copy message"
           >
             {copied ? (
               <>

@@ -13,11 +13,12 @@ interface ButtonProps extends HTMLMotionProps<"button"> {
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-900/40 hover:from-indigo-400 hover:to-purple-500",
-  secondary: "glass text-slate-100 hover:bg-white/10",
+    "bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 text-white shadow-lg shadow-indigo-950/50 hover:shadow-indigo-900/60 hover:brightness-110",
+  secondary:
+    "border border-white/10 bg-white/5 text-slate-100 hover:border-white/20 hover:bg-white/10",
   ghost: "text-slate-300 hover:bg-white/10 hover:text-white",
   danger:
-    "bg-red-500/15 text-red-300 hover:bg-red-500/25 border border-red-500/30",
+    "border border-red-500/30 bg-red-500/15 text-red-300 hover:bg-red-500/25",
 };
 
 const sizes: Record<Size, string> = {
@@ -33,8 +34,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <motion.button
         ref={ref}
         whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.97 }}
-        className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
+        whileTap={{ scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium outline-none transition-[background,box-shadow,border-color,filter] duration-200 focus-visible:ring-2 focus-visible:ring-indigo-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a12] disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
         {...props}
       >
         {children}
