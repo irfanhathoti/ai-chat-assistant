@@ -41,6 +41,9 @@ export default function ChatWindow({
   }, [messages, sending]);
 
   const isEmpty = messages.length === 0 && !sending && !loadingMessages;
+  // Show the typing indicator only until the assistant's reply starts
+  // streaming (i.e. while the last message is still the user's).
+  const awaitingReply = messages[messages.length - 1]?.role === "user";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -60,7 +63,7 @@ export default function ChatWindow({
               ))}
             </AnimatePresence>
 
-            {sending && (
+            {sending && awaitingReply && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

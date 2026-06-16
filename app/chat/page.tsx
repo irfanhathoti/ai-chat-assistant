@@ -118,6 +118,9 @@ function ChatPage() {
     setMessages((prev) => [...prev, userMsg]);
     setSending(true);
 
+    // Tracks whether the assistant reply began streaming — controls rollback.
+    let streamingStarted = false;
+
     try {
       // Ensure we have a chat document (create lazily on first message).
       let chatId = activeChatId;
@@ -131,42 +134,59 @@ function ChatPage() {
       // Persist the user message.
       await addMessage(uid, chatId, "user", text);
 
-      // Call the server-side AI route.
+      // Call the server-side AI route (streams the reply chunk by chunk).
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, history }),
       });
 
-      if (!res.ok) {
+      if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "Request failed");
       }
 
-      const { reply } = (await res.json()) as { reply: string };
+      // Read the stream and grow the assistant bubble live.
+      const assistantId = crypto.randomUUID();
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = "";
 
-      // Render + persist the assistant reply.
-      const assistantMsg: UIMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: reply,
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
-      await addMessage(uid, chatId, "assistant", reply);
-
-      // For brand-new chats, make sure the title reflects the first message.
-      if (isNewChat) {
-        await updateChatTitle(uid, chatId, titleFromMessage(text));
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        if (!chunk) continue;
+        acc += chunk;
+        if (!streamingStarted) {
+          streamingStarted = true;
+          setMessages((prev) => [
+            ...prev,
+            { id: assistantId, role: "assistant", content: acc },
+          ]);
+        } else {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantId ? { ...m, content: acc } : m))
+          );
+        }
       }
+      acc = (acc + decoder.decode()).trim();
+      setMessages((prev) =>
+        prev.map((m) => (m.id === assistantId ? { ...m, content: acc } : m))
+      );
 
-      // Refresh the sidebar (ordering + titles).
+      // Persist the assistant reply + refresh sidebar ordering/titles.
+      if (acc) await addMessage(uid, chatId, "assistant", acc);
+      if (isNewChat) await updateChatTitle(uid, chatId, titleFromMessage(text));
       await refreshChats();
     } catch (err) {
       console.error(err);
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       toast.error(msg);
-      // Roll back the optimistic user message on failure.
-      setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+      // Roll back the optimistic user message only if nothing streamed yet.
+      if (!streamingStarted) {
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+      }
     } finally {
       setSending(false);
     }

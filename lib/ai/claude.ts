@@ -43,21 +43,33 @@ function toClaudeMessages(messages: ChatMessage[]): Anthropic.MessageParam[] {
   return cleaned;
 }
 
-/** Call Claude and return the assistant's text reply. */
-export async function generateClaudeResponse(
+/** Stream Claude's reply as text chunks. */
+export async function* streamClaudeResponse(
   messages: ChatMessage[]
-): Promise<string> {
-  const response = await getClient().messages.create({
+): AsyncGenerator<string> {
+  const stream = await getClient().messages.create({
     model: CLAUDE_MODEL,
     max_tokens: CLAUDE_MAX_TOKENS,
     system: SYSTEM_PROMPT,
     messages: toClaudeMessages(messages),
+    stream: true,
   });
 
-  // Concatenate all text blocks of the response.
-  return response.content
-    .filter((block): block is Anthropic.TextBlock => block.type === "text")
-    .map((block) => block.text)
-    .join("")
-    .trim();
+  for await (const event of stream) {
+    if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "text_delta"
+    ) {
+      yield event.delta.text;
+    }
+  }
+}
+
+/** Call Claude and return the full assistant reply (collects the stream). */
+export async function generateClaudeResponse(
+  messages: ChatMessage[]
+): Promise<string> {
+  let out = "";
+  for await (const chunk of streamClaudeResponse(messages)) out += chunk;
+  return out.trim();
 }

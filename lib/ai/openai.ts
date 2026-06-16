@@ -26,21 +26,34 @@ function getClient(): OpenAI {
   return client;
 }
 
-/** Call OpenAI Chat Completions and return the assistant's text reply. */
-export async function generateOpenAIResponse(
+/** Stream OpenAI's reply as text chunks. */
+export async function* streamOpenAIResponse(
   messages: ChatMessage[]
-): Promise<string> {
+): AsyncGenerator<string> {
   // Our roles ("user" | "assistant") map 1:1 onto OpenAI's chat roles.
   const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM_PROMPT },
     ...messages.map((m) => ({ role: m.role, content: m.content })),
   ];
 
-  const completion = await getClient().chat.completions.create({
+  const stream = await getClient().chat.completions.create({
     model: OPENAI_MODEL,
     max_tokens: OPENAI_MAX_TOKENS,
     messages: chatMessages,
+    stream: true,
   });
 
-  return completion.choices[0]?.message?.content?.trim() ?? "";
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (delta) yield delta;
+  }
+}
+
+/** Call OpenAI and return the full assistant reply (collects the stream). */
+export async function generateOpenAIResponse(
+  messages: ChatMessage[]
+): Promise<string> {
+  let out = "";
+  for await (const chunk of streamOpenAIResponse(messages)) out += chunk;
+  return out.trim();
 }

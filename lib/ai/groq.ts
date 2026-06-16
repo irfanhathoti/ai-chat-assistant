@@ -29,20 +29,33 @@ function getClient(): OpenAI {
   return client;
 }
 
-/** Call Groq (OpenAI-compatible) and return the assistant's text reply. */
-export async function generateGroqResponse(
+/** Stream Groq's reply as text chunks (OpenAI-compatible). */
+export async function* streamGroqResponse(
   messages: ChatMessage[]
-): Promise<string> {
+): AsyncGenerator<string> {
   const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM_PROMPT },
     ...messages.map((m) => ({ role: m.role, content: m.content })),
   ];
 
-  const completion = await getClient().chat.completions.create({
+  const stream = await getClient().chat.completions.create({
     model: GROQ_MODEL,
     max_tokens: GROQ_MAX_TOKENS,
     messages: chatMessages,
+    stream: true,
   });
 
-  return completion.choices[0]?.message?.content?.trim() ?? "";
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (delta) yield delta;
+  }
+}
+
+/** Call Groq and return the full assistant reply (collects the stream). */
+export async function generateGroqResponse(
+  messages: ChatMessage[]
+): Promise<string> {
+  let out = "";
+  for await (const chunk of streamGroqResponse(messages)) out += chunk;
+  return out.trim();
 }
