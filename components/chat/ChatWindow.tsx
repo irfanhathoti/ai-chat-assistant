@@ -29,18 +29,24 @@ export default function ChatWindow({
   loadingMessages,
   onSend,
 }: ChatWindowProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to the latest message whenever the list or typing state changes.
+  // Auto-scroll to the latest message. Scroll the message CONTAINER itself
+  // (not scrollIntoView, which scrolls ancestors and can shift the whole page,
+  // dragging the sidebar and leaving a gap).
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, sending]);
 
   const isEmpty = messages.length === 0 && !sending && !loadingMessages;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="thin-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div
+        ref={scrollRef}
+        className="thin-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto"
+      >
         {isEmpty ? (
           <EmptyChatState onSuggestion={onSend} />
         ) : (
@@ -65,8 +71,6 @@ export default function ChatWindow({
                 </div>
               </motion.div>
             )}
-
-            <div ref={bottomRef} />
           </div>
         )}
       </div>

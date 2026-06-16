@@ -54,7 +54,7 @@ export default function ChatSidebar({
 
       {/* Sidebar — static on desktop, slide-in drawer on mobile */}
       <aside
-        className={`glass fixed inset-y-0 left-0 z-40 flex w-72 flex-col rounded-r-2xl transition-transform duration-300 md:static md:translate-x-0 md:rounded-none md:border-y-0 md:border-l-0 ${
+        className={`glass fixed inset-y-0 left-0 z-40 flex w-72 shrink-0 flex-col rounded-r-2xl transition-transform duration-300 md:static md:translate-x-0 md:rounded-none md:border-y-0 md:border-l-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
