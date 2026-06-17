@@ -18,6 +18,11 @@ import {
   updateChatTitle,
 } from "@/lib/firestore";
 import type { Chat } from "@/types/chat";
+import {
+  toContentPart,
+  toMeta,
+  type Attachment,
+} from "@/lib/attachments";
 
 /** Build a short chat title from the first user message. */
 function titleFromMessage(text: string): string {
@@ -102,18 +107,26 @@ function ChatPage() {
     }
   }
 
-  async function handleSend(text: string) {
+  async function handleSend(text: string, attachments?: Attachment[]) {
     if (sending) return;
+    const files = attachments ?? [];
+    if (!text.trim() && files.length === 0) return;
 
     // Snapshot the prior conversation BEFORE adding the new message (used as
-    // history for the AI request).
+    // history for the AI request). Attachment bytes are NOT resent on later
+    // turns — only the typed text is kept in history.
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
 
-    // Optimistically render the user message.
+    // What we persist/title with: the text, or the filenames if text is empty.
+    const persistedText =
+      text.trim() || files.map((f) => f.name).join(", ") || "(attachment)";
+
+    // Optimistically render the user message (with attachment chips).
     const userMsg: UIMessage = {
       id: crypto.randomUUID(),
       role: "user",
       content: text,
+      attachments: files.length ? files.map(toMeta) : undefined,
     };
     setMessages((prev) => [...prev, userMsg]);
     setSending(true);
@@ -126,19 +139,23 @@ function ChatPage() {
       let chatId = activeChatId;
       let isNewChat = false;
       if (!chatId) {
-        chatId = await createChat(uid, titleFromMessage(text));
+        chatId = await createChat(uid, titleFromMessage(persistedText));
         setActiveChatId(chatId);
         isNewChat = true;
       }
 
-      // Persist the user message.
-      await addMessage(uid, chatId, "user", text);
+      // Persist the user message (text + filename note; file bytes aren't stored).
+      await addMessage(uid, chatId, "user", persistedText);
 
       // Call the server-side AI route (streams the reply chunk by chunk).
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history }),
+        body: JSON.stringify({
+          message: text,
+          history,
+          attachments: files.length ? files.map(toContentPart) : undefined,
+        }),
       });
 
       if (!res.ok || !res.body) {
@@ -177,7 +194,7 @@ function ChatPage() {
 
       // Persist the assistant reply + refresh sidebar ordering/titles.
       if (acc) await addMessage(uid, chatId, "assistant", acc);
-      if (isNewChat) await updateChatTitle(uid, chatId, titleFromMessage(text));
+      if (isNewChat) await updateChatTitle(uid, chatId, titleFromMessage(persistedText));
       await refreshChats();
     } catch (err) {
       console.error(err);

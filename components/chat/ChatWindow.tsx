@@ -8,11 +8,13 @@ import EmptyChatState from "./EmptyChatState";
 import MessageSkeleton from "./MessageSkeleton";
 import ChatInput from "./ChatInput";
 import type { Role } from "@/types/chat";
+import type { Attachment, AttachmentMeta } from "@/lib/attachments";
 
 export interface UIMessage {
   id: string;
   role: Role;
   content: string;
+  attachments?: AttachmentMeta[];
 }
 
 interface ChatWindowProps {
@@ -20,7 +22,7 @@ interface ChatWindowProps {
   sending: boolean;
   /** True while messages for a selected chat are being fetched. */
   loadingMessages: boolean;
-  onSend: (message: string) => void;
+  onSend: (message: string, attachments?: Attachment[]) => void;
 }
 
 /** The main chat surface: scrollable message list + fixed input. */
@@ -59,7 +61,12 @@ export default function ChatWindow({
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6">
             <AnimatePresence initial={false}>
               {messages.map((m) => (
-                <MessageBubble key={m.id} role={m.role} content={m.content} />
+                <MessageBubble
+                  key={m.id}
+                  role={m.role}
+                  content={m.content}
+                  attachments={m.attachments}
+                />
               ))}
             </AnimatePresence>
 

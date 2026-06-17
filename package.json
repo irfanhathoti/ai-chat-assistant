@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
+    "@anthropic-ai/sdk": "^0.104.2",
     "firebase": "^10.12.5",
     "framer-motion": "^11.3.8",
     "lucide-react": "^0.408.0",

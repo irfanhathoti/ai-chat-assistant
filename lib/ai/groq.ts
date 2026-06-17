@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { ChatMessage } from "@/types/chat";
+import { flattenToText } from "./content";
 
 // Groq exposes an OpenAI-compatible API, so we reuse the OpenAI SDK with a
 // custom baseURL. Free tier requires no credit card — get a key at
@@ -35,7 +36,7 @@ export async function* streamGroqResponse(
 ): AsyncGenerator<string> {
   const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM_PROMPT },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ...messages.map((m) => ({ role: m.role, content: flattenToText(m.content) })),
   ];
 
   const stream = await getClient().chat.completions.create({

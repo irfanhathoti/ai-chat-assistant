@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { streamAIResponse, type AIProvider } from "@/lib/ai/provider";
-import type { ChatMessage } from "@/types/chat";
+import type { ChatMessage, ContentPart } from "@/types/chat";
 
 // Run on the Node.js runtime (the AI SDKs aren't Edge-compatible).
 export const runtime = "nodejs";
@@ -13,6 +13,8 @@ interface ChatRequestBody {
   message: string;
   history?: ChatMessage[];
   provider?: AIProvider;
+  /** Files attached to the new user message (images, PDFs, extracted text). */
+  attachments?: ContentPart[];
 }
 
 /** Map a provider/SDK error to a clear, safe client message + HTTP status. */
@@ -51,18 +53,29 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { message, history = [], provider } = body;
-  if (!message || typeof message !== "string" || !message.trim()) {
+  const { message, history = [], provider, attachments = [] } = body;
+  const hasText = typeof message === "string" && message.trim().length > 0;
+  const hasAttachments = Array.isArray(attachments) && attachments.length > 0;
+  if (!hasText && !hasAttachments) {
     return NextResponse.json(
-      { error: "A non-empty 'message' is required." },
+      { error: "Provide a message or at least one attachment." },
       { status: 400 }
     );
   }
 
+  // The new user turn: attachments first, then the typed message (if any).
+  // A string keeps the common no-attachment path lightweight.
+  const userContent: ChatMessage["content"] = hasAttachments
+    ? [
+        ...attachments,
+        ...(hasText ? [{ type: "text" as const, text: message }] : []),
+      ]
+    : message;
+
   // Build the full conversation: prior history + the new user message.
   const messages: ChatMessage[] = [
     ...history.map((m) => ({ role: m.role, content: m.content })),
-    { role: "user", content: message },
+    { role: "user", content: userContent },
   ];
 
   // Pull the FIRST chunk before committing to a streaming response. Setup

@@ -169,11 +169,13 @@ body {
 .markdown code {
   @apply rounded-md bg-black/40 px-1.5 py-0.5 font-mono text-[0.85em] text-indigo-200;
 }
+/* The CodeBlock component owns the frame (border/rounding/margin); the inner
+   <pre> only handles scrolling, background, and padding. */
 .markdown pre {
-  @apply my-3 overflow-x-auto rounded-xl border border-white/10 bg-black/50 p-4;
+  @apply overflow-x-auto bg-black/45 p-4;
 }
 .markdown pre code {
-  @apply bg-transparent p-0 text-slate-100;
+  @apply bg-transparent p-0 text-[13.5px] leading-relaxed text-slate-100;
 }
 .markdown h1,
 .markdown h2,

@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ChatMessage } from "@/types/chat";
+import type { ChatMessage, ContentPart } from "@/types/chat";
 
 // ---- Configuration (keep model + limits in one place) ----------------------
 
@@ -28,6 +28,37 @@ function getClient(): Anthropic {
   return client;
 }
 
+/** Map our multimodal parts onto Claude's native content blocks. */
+function toClaudeContent(
+  content: string | ContentPart[]
+): string | Anthropic.ContentBlockParam[] {
+  if (typeof content === "string") return content;
+  return content.map((part): Anthropic.ContentBlockParam => {
+    if (part.type === "text") {
+      return { type: "text", text: part.text };
+    }
+    if (part.type === "image") {
+      return {
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: part.mediaType as
+            | "image/jpeg"
+            | "image/png"
+            | "image/gif"
+            | "image/webp",
+          data: part.data,
+        },
+      };
+    }
+    // document (PDF) — Claude reads it natively, including scans and tables.
+    return {
+      type: "document",
+      source: { type: "base64", media_type: "application/pdf", data: part.data },
+    };
+  });
+}
+
 /**
  * Convert our provider-agnostic messages into Claude's message format.
  * Claude expects alternating user/assistant turns with no leading assistant
@@ -38,14 +69,14 @@ function toClaudeMessages(messages: ChatMessage[]): Anthropic.MessageParam[] {
   const cleaned: Anthropic.MessageParam[] = [];
   for (const m of messages) {
     if (cleaned.length === 0 && m.role !== "user") continue;
-    cleaned.push({ role: m.role, content: m.content });
+    cleaned.push({ role: m.role, content: toClaudeContent(m.content) });
   }
   return cleaned;
 }
 
 /** Stream Claude's reply as text chunks. */
 export async function* streamClaudeResponse(
-  messages: ChatMessage[]
+  messages: ChatMessage[],
 ): AsyncGenerator<string> {
   const stream = await getClient().messages.create({
     model: CLAUDE_MODEL,
@@ -67,7 +98,7 @@ export async function* streamClaudeResponse(
 
 /** Call Claude and return the full assistant reply (collects the stream). */
 export async function generateClaudeResponse(
-  messages: ChatMessage[]
+  messages: ChatMessage[],
 ): Promise<string> {
   let out = "";
   for await (const chunk of streamClaudeResponse(messages)) out += chunk;

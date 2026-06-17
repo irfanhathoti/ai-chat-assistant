@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { ChatMessage } from "@/types/chat";
+import { flattenToText } from "./content";
 
 // ---- Configuration (keep model + limits in one place) ----------------------
 
@@ -33,7 +34,7 @@ export async function* streamOpenAIResponse(
   // Our roles ("user" | "assistant") map 1:1 onto OpenAI's chat roles.
   const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM_PROMPT },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ...messages.map((m) => ({ role: m.role, content: flattenToText(m.content) })),
   ];
 
   const stream = await getClient().chat.completions.create({

@@ -19,6 +19,34 @@ export interface Message {
   createdAt: Timestamp | null;
 }
 
+/** ---- Multimodal content parts -------------------------------------------
+ * A message's content is either a plain string (the common case) or an array
+ * of typed parts so users can attach files. Each provider adapter maps these
+ * to its own format (Claude has native image/PDF support; OpenAI/Groq get a
+ * text fallback). `data` is base64 for image/document, raw text for text.
+ */
+export interface TextPart {
+  type: "text";
+  text: string;
+}
+export interface ImagePart {
+  type: "image";
+  /** e.g. "image/png", "image/jpeg" */
+  mediaType: string;
+  /** base64-encoded bytes (no data: prefix) */
+  data: string;
+  name: string;
+}
+export interface DocumentPart {
+  type: "document";
+  /** Currently always "application/pdf" (Claude's native document type). */
+  mediaType: string;
+  /** base64-encoded bytes (no data: prefix) */
+  data: string;
+  name: string;
+}
+export type ContentPart = TextPart | ImagePart | DocumentPart;
+
 /**
  * Provider-agnostic message shape sent to /api/chat.
  * Deliberately decoupled from Firestore (no Timestamp, no id) so any AI
@@ -26,5 +54,5 @@ export interface Message {
  */
 export interface ChatMessage {
   role: Role;
-  content: string;
+  content: string | ContentPart[];
 }

@@ -4,19 +4,45 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Check, Copy, Sparkles, User as UserIcon } from "lucide-react";
+import {
+  Check,
+  Copy,
+  FileText,
+  ImageIcon,
+  Paperclip,
+  Sparkles,
+  User as UserIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import type { Role } from "@/types/chat";
+import type { AttachmentMeta } from "@/lib/attachments";
+import { formatSize } from "@/lib/attachments";
+import CodeBlock from "./CodeBlock";
 
 interface MessageBubbleProps {
   role: Role;
   content: string;
+  attachments?: AttachmentMeta[];
+}
+
+const MARKDOWN_COMPONENTS = { pre: CodeBlock };
+
+function AttachmentIcon({ kind }: { kind: AttachmentMeta["kind"] }) {
+  const cls = "h-3.5 w-3.5 shrink-0";
+  if (kind === "image") return <ImageIcon className={cls} />;
+  if (kind === "document") return <FileText className={cls} />;
+  return <Paperclip className={cls} />;
 }
 
 /** A single user/assistant chat bubble with copy-to-clipboard on assistant messages. */
-export default function MessageBubble({ role, content }: MessageBubbleProps) {
+export default function MessageBubble({
+  role,
+  content,
+  attachments,
+}: MessageBubbleProps) {
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
+  const hasAttachments = !!attachments && attachments.length > 0;
 
   async function handleCopy() {
     try {
@@ -64,13 +90,35 @@ export default function MessageBubble({ role, content }: MessageBubbleProps) {
               : "glass rounded-tl-sm text-slate-100 shadow-sm shadow-black/20"
           }`}
         >
-          {isUser ? (
-            <p className="whitespace-pre-wrap break-words">{content}</p>
-          ) : (
-            <div className="markdown break-words">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          {/* Attached files (user messages) */}
+          {hasAttachments && (
+            <div className={`flex flex-wrap gap-1.5 ${content ? "mb-2" : ""}`}>
+              {attachments!.map((a, i) => (
+                <span
+                  key={`${a.name}-${i}`}
+                  className="inline-flex max-w-[220px] items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-xs text-white/90"
+                  title={`${a.name} · ${formatSize(a.size)}`}
+                >
+                  <AttachmentIcon kind={a.kind} />
+                  <span className="truncate">{a.name}</span>
+                </span>
+              ))}
             </div>
           )}
+
+          {content &&
+            (isUser ? (
+              <p className="whitespace-pre-wrap break-words">{content}</p>
+            ) : (
+              <div className="markdown break-words">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={MARKDOWN_COMPONENTS}
+                >
+                  {content}
+                </ReactMarkdown>
+              </div>
+            ))}
         </div>
 
         {/* Copy button (assistant only) */}
