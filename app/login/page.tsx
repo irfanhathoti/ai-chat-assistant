@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { signInWithGoogle } from "@/lib/auth";
 import Button from "@/components/ui/Button";
+import Logo from "@/components/ui/Logo";
 
 export default function LoginPage() {
   const { user, loading } = useAuth();
@@ -58,9 +59,9 @@ export default function LoginPage() {
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-900/50"
+            className="mx-auto mb-5 flex h-16 w-16 items-center justify-center"
           >
-            <Sparkles className="h-8 w-8 text-white" />
+            <Logo size={64} className="drop-shadow-[0_8px_24px_rgba(99,102,241,0.45)]" />
           </motion.div>
           <h1 className="text-2xl font-bold tracking-tight text-white">
             AI Chat Assistant

@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, Sparkles } from "lucide-react";
+import { Menu } from "lucide-react";
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow, { type UIMessage } from "@/components/chat/ChatWindow";
+import Logo from "@/components/ui/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/lib/auth";
 import {
@@ -234,9 +235,7 @@ function ChatPage() {
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
+            <Logo size={28} />
             <span className="font-semibold text-white">AI Chat</span>
           </div>
         </header>

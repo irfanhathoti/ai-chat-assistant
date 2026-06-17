@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 interface EmptyChatStateProps {
   /** Optional handler to start a chat from a suggestion. */
@@ -28,9 +29,7 @@ export default function EmptyChatState({ onSuggestion }: EmptyChatStateProps) {
         {/* Glowing logo */}
         <div className="relative mb-6">
           <div className="absolute inset-0 rounded-2xl bg-indigo-500/40 blur-2xl" />
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 shadow-xl shadow-indigo-950/60 ring-1 ring-white/20">
-            <Sparkles className="h-8 w-8 text-white" />
-          </div>
+          <Logo size={64} className="relative" />
         </div>
 
         <h2 className="bg-gradient-to-b from-white to-slate-400 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">

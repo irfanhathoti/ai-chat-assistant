@@ -1,17 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  LogOut,
-  MessageSquare,
-  Plus,
-  Trash2,
-  X,
-  Sparkles,
-} from "lucide-react";
+import { LogOut, MessageSquare, Plus, Trash2, X } from "lucide-react";
 import type { Chat } from "@/types/chat";
 import type { User } from "@/lib/auth";
 import Button from "@/components/ui/Button";
+import Logo from "@/components/ui/Logo";
 
 interface ChatSidebarProps {
   chats: Chat[];
@@ -61,9 +55,7 @@ export default function ChatSidebar({
         {/* Header */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 shadow-lg shadow-indigo-950/50 ring-1 ring-white/20">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
+            <Logo size={32} className="drop-shadow-lg" />
             <span className="font-semibold tracking-tight text-white">AI Chat</span>
           </div>
           <button
