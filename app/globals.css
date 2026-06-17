@@ -189,3 +189,26 @@ body {
 .markdown td {
   @apply border border-white/10 px-3 py-1.5 text-left;
 }
+
+/* ---- Legal pages (Terms / Privacy) prose ------------------------------- */
+.legal {
+  @apply text-[15px] leading-relaxed text-slate-300;
+}
+.legal h2 {
+  @apply mb-2 mt-8 text-lg font-semibold text-white;
+}
+.legal h3 {
+  @apply mb-1.5 mt-5 text-base font-semibold text-slate-100;
+}
+.legal p {
+  @apply my-3;
+}
+.legal ul {
+  @apply my-3 list-disc space-y-1.5 pl-5;
+}
+.legal a {
+  @apply text-indigo-300 underline underline-offset-2 transition-colors hover:text-indigo-200;
+}
+.legal strong {
+  @apply font-medium text-slate-100;
+}

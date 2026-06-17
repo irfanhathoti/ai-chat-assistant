@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -87,7 +88,21 @@ export default function LoginPage() {
         </Button>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          By continuing you agree to our Terms & Privacy Policy.
+          By continuing you agree to our{" "}
+          <Link
+            href="/terms"
+            className="text-slate-300 underline underline-offset-2 transition-colors hover:text-indigo-300"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/privacy"
+            className="text-slate-300 underline underline-offset-2 transition-colors hover:text-indigo-300"
+          >
+            Privacy Policy
+          </Link>
+          .
         </p>
       </motion.div>
     </div>
